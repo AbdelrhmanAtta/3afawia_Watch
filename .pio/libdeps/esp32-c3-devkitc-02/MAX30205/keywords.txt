@@ -1,0 +1,48 @@
+# Syntax Colouring Map For MAX30205
+
+# Data types (KEYWORD1)
+MAX30205	KEYWORD1
+
+
+# Methods and Functions (KEYWORD2)
+begin	KEYWORD2
+isConnected	KEYWORD2
+getAddress	KEYWORD2
+
+read	KEYWORD2
+getTemperature	KEYWORD2
+getAccuracy	KEYWORD2
+
+setConfig	KEYWORD2
+getConfig	KEYWORD2
+shutDown	KEYWORD2
+wakeUp	KEYWORD2
+setModeComparator	KEYWORD2
+setModeInterrupt	KEYWORD2
+
+setPolarity	KEYWORD2
+setFaultQueLevel	KEYWORD2
+setDataFormat	KEYWORD2
+setTimeout	KEYWORD2
+
+setModeContinuous	KEYWORD2
+setModeOneShot	KEYWORD2
+
+setHysteresis	KEYWORD2
+getHysteresis	KEYWORD2
+setOverTemperature	KEYWORD2
+getOverTemperature	KEYWORD2
+
+getLastError	KEYWORD2
+
+
+# Constants (LITERAL1)
+MAX30205_LIB_VERSION	LITERAL1
+
+MAX30205_DEFAULT_ADDRESS	LITERAL1
+
+MAX30205_OK	LITERAL1
+MAX30205_NOT_READY	LITERAL1
+MAX30205_REQUEST_ERROR	LITERAL1
+MAX30205_READ_TOO_FAST	LITERAL1
+

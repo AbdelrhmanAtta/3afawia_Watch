@@ -1,0 +1,6 @@
+boschsensortec/bsec2 @ ^1.10.2610
+Wire
+robtillaart/MAX30205 @ ^0.1.2
+boschsensortec/BME68x Sensor library @ ^1.1.40106
+sparkfun/SparkFun BMI270 Arduino Library @ ^1.0.3
+jaikulk14/AdvancedOximeter @ ^1.0.0
