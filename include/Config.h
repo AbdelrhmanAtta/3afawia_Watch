@@ -20,8 +20,11 @@
 #define SKIN_FEVER_LIMIT 38.0
 #define SKIN_HYSTERESIS  37.5
 
+// --- BMI270 CONFIG ---
+#define BMI270_ADDRESS 0x68
+
 // --- BLE CONFIG (UUIDs) ---
-#define BLE_DEVICE_NAME        "3afawia Watch V6" 
+#define BLE_DEVICE_NAME        "3afawia Watch" 
 #define SERVICE_UUID           "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 #define BODY_TEMP_CHAR_UUID    "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 #define AIR_TEMP_CHAR_UUID     "584cb263-2280-485a-939e-2c81d22e8fb7"
@@ -30,3 +33,7 @@
 #define PRESSURE_CHAR_UUID     "7132174c-423c-4467-9c86-ef925c4864c2"
 #define ECO2_CHAR_UUID         "e0132338-0050-48a0-8f93-01308a0d9d3d"
 #define VOC_CHAR_UUID          "8d7e0031-1f9d-4340-974a-a03975765954"
+#define STEP_COUNT_UUID        "c4e20001-2b0b-47e2-9b2f-2d79d6184762"
+#define MOTION_STATE_UUID      "c4e20002-2b0b-47e2-9b2f-2d79d6184762"
+#define SLEEP_HEAVY_UUID       "c4e20003-2b0b-47e2-9b2f-2d79d6184762"
+#define SLEEP_LIGHT_UUID       "c4e20004-2b0b-47e2-9b2f-2d79d6184762"

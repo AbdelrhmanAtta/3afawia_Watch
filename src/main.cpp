@@ -3,10 +3,12 @@
 #include "Config.h"
 #include "BME680_Handler.h"
 #include "MAX30205_Handler.h"
+#include "BMI270_Handler.h"
 #include "BLE_Handler.h"
 
 AirHandler airSensor;
 TempHandler bodySensor(MAX30205_ADDRESS);
+BMI270_Handler bmiSensor;
 BleManager bleServer;
 
 void setup() {
@@ -23,21 +25,24 @@ void setup() {
 
     bodySensor.begin();
     airSensor.begin();
+    bmiSensor.begin();
 }
 
 void loop() {
     bodySensor.update();
     airSensor.update();
+    bmiSensor.update();
 
     #if BLE_ENABLED
     static unsigned long lastBleUpdate = 0;
-    if (millis() - lastBleUpdate > READ_PERIOD_MS) {
-        // Removed Accuracy from the call
-        bleServer.updateData(
-            bodySensor.getTemp(), airSensor.getTemp(), airSensor.getHumidity(),
-            airSensor.getIAQ(), airSensor.getPressure(), airSensor.getCO2(),
-            airSensor.getVOC()
-        );
+    if (millis() - lastBleUpdate > 5000) {
+        if (bleServer.isConnected()) {
+            bleServer.updateData(
+                bodySensor.getTemp(), airSensor.getTemp(), airSensor.getHumidity(),
+                airSensor.getIAQ(), airSensor.getPressure(), airSensor.getCO2(),
+                airSensor.getVOC(), bmiSensor.getSteps(), bmiSensor.getActivity()
+            );
+        }
         lastBleUpdate = millis();
     }
     #endif

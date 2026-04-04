@@ -9,12 +9,15 @@ class BleManager : public BLEServerCallbacks {
 public:
     BleManager();
     void begin();
-    void updateData(float bodyTemp, float airTemp, float humidity, float iaq, float pressure, float eco2, float voc);
+    bool isConnected();
+    void updateData(float bodyTemp, float airTemp, float humidity, float iaq, float pressure, float eco2, float voc, uint32_t steps, String activity);
+    
     void onConnect(BLEServer* pServer) override;
     void onDisconnect(BLEServer* pServer) override;
 
 private:
     BLEServer* pServer;
     BLECharacteristic *bodyTempChar, *airTempChar, *humidityChar, *iaqChar, *pressureChar, *eco2Char, *vocChar;
+    BLECharacteristic *stepsChar, *activityChar;
     bool deviceConnected;
 };
