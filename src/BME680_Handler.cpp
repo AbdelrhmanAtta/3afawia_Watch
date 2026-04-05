@@ -42,7 +42,7 @@ void AirHandler::update() {
     }
     #if SERIAL_DEBUG
     if (millis() - lastPrint > READ_PERIOD_MS) {
-        Serial.printf("[BME680] Temp: %.2f C | Hum: %.2f %% | Pres: %.1f hPa | IAQ: %.0f (Acc: %d) | eCO2: %.0f ppm | VOC: %.2f ppm\n\n", roomTemp, humidity, pressure, iaqScore, iaqAccuracy, eco2Value, vocValue);
+        Serial.printf("[BME680] Temp: %.2f C | Hum: %.2f %% | Pres: %.1f hPa | IAQ: %.0f (Acc: %d) | eCO2: %.0f ppm | VOC: %.2f ppm\n", roomTemp, humidity, pressure, iaqScore, iaqAccuracy, eco2Value, vocValue);
         lastPrint = millis();
     }
     #endif

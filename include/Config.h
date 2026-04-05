@@ -1,27 +1,23 @@
 #pragma once
 
-// --- I2C PINS ---
+// --- I2C CONFIG ---
 #define I2C_SDA_PIN 2
 #define I2C_SCL_PIN 3
+#define BMI270_ADDRESS 0x68 
 
 // --- TIMING CONFIG ---
-#define READ_PERIOD_MS 3000
+#define READ_PERIOD_MS 3000                 
+#define BME680_STATE_SAVE_PERIOD_MS 3600000 
 
 // --- SYSTEM TOGGLES ---
 #define SERIAL_DEBUG 1
 #define BLE_ENABLED  1  
 
-// --- BME680 CONFIG ---
+// --- SENSOR CONFIG ---
 #define BME680_ADDRESS 0x76
-#define BME680_STATE_SAVE_PERIOD_MS 3600000 
-
-// --- MAX30205 CONFIG ---
 #define MAX30205_ADDRESS 0x48
 #define SKIN_FEVER_LIMIT 38.0
 #define SKIN_HYSTERESIS  37.5
-
-// --- BMI270 CONFIG ---
-#define BMI270_ADDRESS 0x68
 
 // --- BLE CONFIG (UUIDs) ---
 #define BLE_DEVICE_NAME        "3afawia Watch" 

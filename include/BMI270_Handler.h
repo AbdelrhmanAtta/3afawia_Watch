@@ -9,25 +9,38 @@ public:
     bool begin();
     void update();
     
-    // Standalone function for other files to check motion noise
-    // Returns TRUE if the sensor is moving enough to ruin PPG data
     bool isPpgMovementDetected();
-
     uint32_t getSteps()    { return stepCount; }
     String getActivity()   { return actStr; }
-
-    BMI270 imu;
-    uint32_t stepCount;
-    uint8_t currentActivity;
-    String actStr;
+    
+    bool isAsleep()        { return userIsAsleep; }
+    float getSleepHrs()    { return sleepHours; }
+    uint8_t getDeepSleep() { return deepSleepPct; }
+    uint8_t getLightSleep(){ return lightSleepPct; }
 
 private:
+    void handleMotion();
+    void calculateSleepQuality();
+    
+    BMI270 imu;
+    uint32_t stepCount;
     uint32_t lastPrintedSteps;
+    uint8_t currentActivity;
     uint8_t pendingActivity;
     unsigned long activityChangeTime;
     unsigned long lastPrintTime;
+    String actStr;
 
-    void handleMotion();
+    bool userIsAsleep;
+    bool isAttemptingWake;
+    unsigned long sleepStartTime;
+    unsigned long wakeStartTime;
+    uint32_t wakeStepAnchor;
+    float sleepHours;
+    uint32_t jitterCount;        
+    uint32_t totalSleepSamples;  
+    uint8_t deepSleepPct;
+    uint8_t lightSleepPct;
 };
 
 extern BMI270_Handler* bmiInstance;

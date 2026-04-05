@@ -36,7 +36,7 @@ void TempHandler::update() {
                 int16_t raw = (Wire.read() << 8) | Wire.read();
                 currentTemp = raw * 0.00390625;
                 #if SERIAL_DEBUG
-                Serial.printf("[MAX30205] Body Temp: %.2f C\n\n", currentTemp);
+                Serial.printf("[MAX30205] Body Temp: %.2f C\n", currentTemp);
                 #endif
             }
         }
