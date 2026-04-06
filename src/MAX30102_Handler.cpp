@@ -9,31 +9,12 @@ PPGHandler::PPGHandler() :
 
 bool PPGHandler::begin() {
     if (!sensor.begin(Wire, I2C_SPEED_FAST)) return false;
-<<<<<<< HEAD
-    // Ultra-Punch Wrist Settings
-=======
     // Power settings for wrist-based reflection
->>>>>>> 30cb0a6 (yay the ppg fixedgit add .)
     sensor.setup(0x50, 4, 2, 100, 411, 16384); 
     return true;
 }
 
 void PPGHandler::update(bool isMoving) {
-<<<<<<< HEAD
-    static unsigned long lastDebug = 0;
-    if (millis() - lastMsgTime < 30000 && batchCount == 0) return;
-    if (isMoving) { sampleIndex = 0; return; }
-
-    uint32_t irCheck = sensor.getIR();
-    if (irCheck < 100) { 
-        batchCount = 0; sampleIndex = 0;
-        return;
-    }
-
-    if (micros() - lastSample >= 40000) {
-        lastSample = micros();
-        irBuffer[sampleIndex] = sensor.getIR();
-=======
     static float currentTotalWeight = 0;
 
     // 1. Motion Rejection: Reset if moving
@@ -62,7 +43,6 @@ void PPGHandler::update(bool isMoving) {
     if (micros() - lastSample >= 40000) {
         lastSample = micros();
         irBuffer[sampleIndex] = irValue;
->>>>>>> 30cb0a6 (yay the ppg fixedgit add .)
         redBuffer[sampleIndex] = sensor.getRed();
         sampleIndex++;
 
@@ -71,25 +51,6 @@ void PPGHandler::update(bool isMoving) {
             PPGData res = processBatch();
             
             if (res.valid) {
-<<<<<<< HEAD
-                sumBPM += res.bpm;
-                sumSpO2 += res.spo2;
-                batchCount++;
-                #if SERIAL_DEBUG
-                Serial.printf("[PPG] FFT Match (%d/5): %.2f BPM\n", batchCount, res.bpm);
-                #endif
-            }
-
-            if (batchCount >= TOTAL_BATCHES) {
-                currentBPM = sumBPM / (float)TOTAL_BATCHES;
-                currentSpO2 = sumSpO2 / (float)TOTAL_BATCHES;
-                dataReady = true;
-                lastMsgTime = millis();
-                #if SERIAL_DEBUG
-                Serial.printf("\n>> FINAL 65-100 BPM AVG: %.2f BPM | %.1f%% SpO2 <<\n\n", currentBPM, currentSpO2);
-                #endif
-                sumBPM = 0; sumSpO2 = 0; batchCount = 0;
-=======
                 // --- WEIGHTED AVERAGE LOGIC ---
                 // Trust 70-85 BPM range (Weight 1.0), otherwise treat as noise (Weight 0.7)
                 float weight = (res.bpm >= 70.0f && res.bpm <= 85.0f) ? 1.0f : 0.7f;
@@ -123,7 +84,6 @@ void PPGHandler::update(bool isMoving) {
                 
                 // Cleanup for next session
                 sumBPM = 0; sumSpO2 = 0; batchCount = 0; currentTotalWeight = 0;
->>>>>>> 30cb0a6 (yay the ppg fixedgit add .)
             }
         }
     }
@@ -142,10 +102,7 @@ PPGData PPGHandler::processBatch() {
     irMean /= (float)BUFFER_SIZE;
     redMean /= (float)BUFFER_SIZE;
 
-<<<<<<< HEAD
-=======
     // Fast DC Removal and FFT
->>>>>>> 30cb0a6 (yay the ppg fixedgit add .)
     FFT.dcRemoval(); 
     FFT.windowing(FFT_WIN_TYP_HAMMING, FFT_FORWARD); 
     FFT.compute(FFT_FORWARD);
@@ -154,41 +111,14 @@ PPGData PPGHandler::processBatch() {
     float maxMag = 0;
     int peakBin = 0;
     
-<<<<<<< HEAD
-    // NARROW FILTER: Bin 6 (~70 BPM) to Bin 9 (~105 BPM)
-    for (int i = 6; i <= 9; i++) { 
-=======
     // Search Bin 6 (~70 BPM) to Bin 10 (~115 BPM)
     for (int i = 6; i <= 10; i++) { 
->>>>>>> 30cb0a6 (yay the ppg fixedgit add .)
         if (vReal[i] > maxMag) {
             maxMag = vReal[i];
             peakBin = i;
         }
     }
 
-<<<<<<< HEAD
-    // Parabolic Interpolation to find the exact BPM between bins
-    if (maxMag > 8.0 && peakBin >= 6) {
-        float y0 = vReal[peakBin - 1];
-        float y1 = vReal[peakBin];
-        float y2 = vReal[peakBin + 1];
-        
-        float centerShift = 0.5f * (y0 - y2) / (y0 - 2.0f * y1 + y2);
-        float refinedBin = (float)peakBin + centerShift;
-        float peakFreq = (refinedBin * (float)FS) / (float)BUFFER_SIZE;
-
-        res.bpm = peakFreq * 60.0f;
-        
-        float irAC = maxMag; 
-        float ratio = ((irAC * 0.82f) / redMean) / (irAC / irMean);
-        res.spo2 = 110.0f - (16.5f * ratio);
-        
-        if (res.spo2 > 99.9f) res.spo2 = 99.8f;
-        if (res.spo2 < 88.0f) res.spo2 = 96.5f;
-        
-        res.valid = true;
-=======
     if (maxMag > 10.0f && peakBin >= 6) {
         // Parabolic Interpolation for Sub-Bin Accuracy
         float y0 = vReal[peakBin - 1];
@@ -207,7 +137,6 @@ PPGData PPGHandler::processBatch() {
         if (res.bpm > 45.0f && res.bpm < 170.0f) {
             res.valid = true;
         }
->>>>>>> 30cb0a6 (yay the ppg fixedgit add .)
     }
     return res;
 }

@@ -29,13 +29,8 @@ void BleManager::begin() {
     activityChar = createChar(MOTION_STATE_UUID);
     sleepHeavyChar = createChar(SLEEP_HEAVY_UUID);
     sleepLightChar = createChar(SLEEP_LIGHT_UUID);
-<<<<<<< HEAD
-    bpmChar = createChar(BPM_CHAR_UUID);
-    spo2Char = createChar(SPO2_CHAR_UUID);
-=======
     bpmChar = createChar(BPM_CHAR_UUID);   // PPG BPM
     spo2Char = createChar(SPO2_CHAR_UUID); // PPG SpO2
->>>>>>> 30cb0a6 (yay the ppg fixedgit add .)
 
     pService->start();
     BLEDevice::startAdvertising();
@@ -44,10 +39,6 @@ void BleManager::begin() {
 void BleManager::onConnect(BLEServer* pS) { deviceConnected = true; }
 void BleManager::onDisconnect(BLEServer* pS) { deviceConnected = false; BLEDevice::startAdvertising(); }
 
-<<<<<<< HEAD
-void BleManager::updateData(float bT, float aT, float h, float i, float p, float e, float v, 
-                            uint32_t s, String a, float bpm, float spo2) {
-=======
 void BleManager::sendMax30205(float bT) {
     if (!deviceConnected) return;
     char buf[32];
@@ -57,33 +48,16 @@ void BleManager::sendMax30205(float bT) {
 }
 
 void BleManager::sendBme680(float aT, float h, float i, float p, float e, float v) {
->>>>>>> 30cb0a6 (yay the ppg fixedgit add .)
     if (!deviceConnected) return;
     char buf[32];
     auto sD = [&](BLECharacteristic* c, const char* val) { c->setValue(val); c->notify(); delay(35); };
     
-<<<<<<< HEAD
-    snprintf(buf, 32, "%.2f C", bT); sD(bodyTempChar, buf);
-=======
->>>>>>> 30cb0a6 (yay the ppg fixedgit add .)
     snprintf(buf, 32, "%.2f C", aT); sD(airTempChar, buf);
     snprintf(buf, 32, "%.1f %%", h); sD(humidityChar, buf);
     snprintf(buf, 32, "%.0f", i); sD(iaqChar, buf);
     snprintf(buf, 32, "%.1f hPa", p); sD(pressureChar, buf);
     snprintf(buf, 32, "%.0f ppm", e); sD(eco2Char, buf);
     snprintf(buf, 32, "%.2f ppm", v); sD(vocChar, buf);
-<<<<<<< HEAD
-    snprintf(buf, 32, "%u", s); sD(stepsChar, buf);
-    sD(activityChar, a.c_str());
-    
-    snprintf(buf, 32, "%.1f BPM", bpm); sD(bpmChar, buf);
-    snprintf(buf, 32, "%.1f %%", spo2); sD(spo2Char, buf);
-
-    #if SERIAL_DEBUG
-    Serial.println("[BLE] Full Sensor Packet Sent.");
-    #endif
-=======
->>>>>>> 30cb0a6 (yay the ppg fixedgit add .)
 }
 
 void BleManager::sendBmi270(uint32_t s, String a) {

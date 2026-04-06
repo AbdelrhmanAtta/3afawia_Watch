@@ -17,39 +17,25 @@ void setup() {
     #if SERIAL_DEBUG
     Serial.begin(115200);
     delay(2000);
-    Serial.println("\n=== SYSTEM START ===");
+    Serial.println("System starting...");
     #endif
 
     Wire.begin(I2C_SDA_PIN, I2C_SCL_PIN);
+
     #if BLE_ENABLED
     bleServer.begin();
     #endif
+
     bodySensor.begin();
     airSensor.begin();
-<<<<<<< HEAD
-    ppgSensor.begin();
-    bmiSensor.begin();
-=======
     bmiSensor.begin();
     ppgSensor.begin();
->>>>>>> 30cb0a6 (yay the ppg fixedgit add .)
 }
 
 void loop() {
+    bodySensor.update();
+    airSensor.update();
     bmiSensor.update();
-<<<<<<< HEAD
-    ppgSensor.update(bmiSensor.isPpgMovementDetected());
-
-    #if BLE_ENABLED
-    if (bleServer.isConnected() && ppgSensor.hasNewData()) {
-        bleServer.updateData(
-            bodySensor.getTemp(), airSensor.getTemp(), airSensor.getHumidity(),
-            airSensor.getIAQ(), airSensor.getPressure(), airSensor.getCO2(),
-            airSensor.getVOC(), bmiSensor.getSteps(), bmiSensor.getActivity(),
-            ppgSensor.getBPM(), ppgSensor.getSpO2()
-        );
-        ppgSensor.clearNewData();
-=======
     
     // PPG Update: ignores reading if motion is detected via BMI270
     ppgSensor.update(bmiSensor.isPpgMovementDetected());
@@ -90,14 +76,6 @@ void loop() {
                 lastBmiUpdate = now;
             }
         }
->>>>>>> 30cb0a6 (yay the ppg fixedgit add .)
     }
     #endif
-
-    static unsigned long lastEnvUpdate = 0;
-    if (millis() - lastEnvUpdate > READ_PERIOD_MS) {
-        bodySensor.update();
-        airSensor.update();
-        lastEnvUpdate = millis();
-    }
 }

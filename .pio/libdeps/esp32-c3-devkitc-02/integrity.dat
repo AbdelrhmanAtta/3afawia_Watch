@@ -1,19 +1,8 @@
-<<<<<<< HEAD
-boschsensortec/bsec2 @ ^1.10.2610
-jaikulk14/AdvancedOximeter @ ^1.0.0
 boschsensortec/BME68x Sensor library @ ^1.1.40106
 sparkfun/SparkFun MAX3010x Pulse and Proximity Sensor Library@^1.1.2
 Wire
-sparkfun/SparkFun BMI270 Arduino Library @ ^1.0.3
-kosme/arduinoFFT@^2.0.4
 robtillaart/MAX30205 @ ^0.1.2
-=======
-sparkfun/SparkFun MAX3010x Pulse and Proximity Sensor Library@^1.1.2
-Wire
-robtillaart/MAX30205 @ ^0.1.2
-boschsensortec/BME68x Sensor library @ ^1.1.40106
 jaikulk14/AdvancedOximeter @ ^1.0.0
+kosme/arduinoFFT@^2.0.4
 sparkfun/SparkFun BMI270 Arduino Library @ ^1.0.3
 boschsensortec/bsec2 @ ^1.10.2610
-kosme/arduinoFFT@^2.0.4
->>>>>>> 30cb0a6 (yay the ppg fixedgit add .)
