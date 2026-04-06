@@ -26,12 +26,18 @@ void setup() {
     #endif
     bodySensor.begin();
     airSensor.begin();
+<<<<<<< HEAD
     ppgSensor.begin();
     bmiSensor.begin();
+=======
+    bmiSensor.begin();
+    ppgSensor.begin();
+>>>>>>> 30cb0a6 (yay the ppg fixedgit add .)
 }
 
 void loop() {
     bmiSensor.update();
+<<<<<<< HEAD
     ppgSensor.update(bmiSensor.isPpgMovementDetected());
 
     #if BLE_ENABLED
@@ -43,6 +49,48 @@ void loop() {
             ppgSensor.getBPM(), ppgSensor.getSpO2()
         );
         ppgSensor.clearNewData();
+=======
+    
+    // PPG Update: ignores reading if motion is detected via BMI270
+    ppgSensor.update(bmiSensor.isPpgMovementDetected());
+
+    #if BLE_ENABLED
+    if (bleServer.isConnected()) {
+        unsigned long now = millis();
+        static unsigned long lastEnvUpdate = 0;
+        static unsigned long lastBmiUpdate = 0;
+
+        // HEART RATE: Parallel check, handler handles the 30s minimum wait
+        if (ppgSensor.hasNewData()) {
+            bleServer.sendHeartData(ppgSensor.getBPM(), ppgSensor.getSpO2());
+            ppgSensor.clearNewData();
+        }
+
+        // ENVIRONMENT: Every 5 Seconds
+        if (now - lastEnvUpdate > 5000) {
+            bleServer.sendMax30205(bodySensor.getTemp());
+            bleServer.sendBme680(
+                airSensor.getTemp(), airSensor.getHumidity(), airSensor.getIAQ(),
+                airSensor.getPressure(), airSensor.getCO2(), airSensor.getVOC()
+            );
+            lastEnvUpdate = now;
+        }
+
+        // BMI270 Logic (Awake vs Sleep)
+        if (!bmiSensor.isAsleep()) {
+            if (now - lastBmiUpdate > 5000) {
+                bleServer.sendBmi270(bmiSensor.getSteps(), bmiSensor.getActivity());
+                lastBmiUpdate = now;
+            }
+        } else {
+            // Asleep: Send statistics every 1 hour
+            if (now - lastBmiUpdate > 3600000) {
+                bleServer.sendBmi270(0, "Sleeping");
+                bleServer.sendSleepData(bmiSensor.getSleepHrs(), bmiSensor.getDeepSleep(), bmiSensor.getLightSleep());
+                lastBmiUpdate = now;
+            }
+        }
+>>>>>>> 30cb0a6 (yay the ppg fixedgit add .)
     }
     #endif
 

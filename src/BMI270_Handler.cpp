@@ -44,24 +44,28 @@ void BMI270_Handler::handleMotion() {
     uint8_t rawActivity = 0;
     imu.getStepActivity(&rawActivity);
 
+    static uint32_t lastStepAnchor = 0;
+    unsigned long now = millis();
+
     if (userIsAsleep) {
         actStr = "Sleeping";
         if (rawActivity == BMI2_STEP_ACTIVITY_WALKING || rawActivity == BMI2_STEP_ACTIVITY_RUNNING) {
             if (!isAttemptingWake) {
                 isAttemptingWake = true;
-                wakeStartTime = millis();
+                wakeStartTime = now;
                 wakeStepAnchor = currentTotalSteps;
             }
         }
         if (isAttemptingWake) {
-            if ((currentTotalSteps - wakeStepAnchor) >= 10 && (millis() - wakeStartTime <= 60000)) {
+            if ((currentTotalSteps - wakeStepAnchor) >= 10 && (now - wakeStartTime <= 60000)) {
                 userIsAsleep = false;
                 isAttemptingWake = false;
-                activityChangeTime = millis();
+                activityChangeTime = now;
+                lastStepAnchor = currentTotalSteps; // Reset anchor on wake
                 #if SERIAL_DEBUG
                 Serial.println("[BMI270] Wake-up detected!");
                 #endif
-            } else if (millis() - wakeStartTime > 60000) {
+            } else if (now - wakeStartTime > 60000) {
                 isAttemptingWake = false;
             }
         }
@@ -70,40 +74,43 @@ void BMI270_Handler::handleMotion() {
         imu.getSensorData();
         float accMag = sqrt(pow(imu.data.accelX, 2) + pow(imu.data.accelY, 2) + pow(imu.data.accelZ, 2));
         if (abs(accMag - 1.0f) > 0.05f) jitterCount++;
-        sleepHours = (millis() - sleepStartTime) / 3600000.0;
+        sleepHours = (now - sleepStartTime) / 3600000.0;
         calculateSleepQuality();
     } 
     else {
         stepCount = currentTotalSteps;
+
+        // Sleep Detection based on Step Count change
+        if (currentTotalSteps > lastStepAnchor) {
+            lastStepAnchor = currentTotalSteps;
+            activityChangeTime = now; // Reset timer because steps were recorded
+        }
+
+        if (now - activityChangeTime > 1200000) { // 20 minutes of no steps
+            userIsAsleep = true;
+            sleepStartTime = now - 1200000;
+            jitterCount = 0;
+            totalSleepSamples = 0;
+            #if SERIAL_DEBUG
+            Serial.println("[BMI270] Entering Sleep Mode (20 min no steps)...");
+            #endif
+        }
+
         if (rawActivity != currentActivity) {
             if (rawActivity == pendingActivity) {
-                if (millis() - activityChangeTime > 5000) {
+                if (now - activityChangeTime > 5000) {
                     currentActivity = rawActivity;
                     switch(currentActivity) {
                         case BMI2_STEP_ACTIVITY_WALKING: actStr = "Walking"; break;
                         case BMI2_STEP_ACTIVITY_RUNNING: actStr = "Running"; break;
                         default:                         actStr = "Still";   break;
                     }
-                    #if SERIAL_DEBUG
-                    Serial.printf("[BMI270] State Shift Confirmed: %s\n", actStr.c_str());
-                    #endif
                 }
             } else {
                 pendingActivity = rawActivity;
-                activityChangeTime = millis();
             }
         } else {
             pendingActivity = currentActivity;
-        }
-
-        if (currentActivity == BMI2_STEP_ACTIVITY_STILL && (millis() - activityChangeTime > 1200000)) {
-            userIsAsleep = true;
-            sleepStartTime = millis() - 1200000;
-            jitterCount = 0;
-            totalSleepSamples = 0;
-            #if SERIAL_DEBUG
-            Serial.println("[BMI270] Entering Sleep Mode...");
-            #endif
         }
     }
 }
