@@ -28,6 +28,8 @@ void BleManager::begin() {
     activityChar = createChar(MOTION_STATE_UUID);
     sleepHeavyChar = createChar(SLEEP_HEAVY_UUID);
     sleepLightChar = createChar(SLEEP_LIGHT_UUID);
+    bpmChar = createChar(BPM_CHAR_UUID);
+    spo2Char = createChar(SPO2_CHAR_UUID);
 
     pService->start();
     BLEDevice::startAdvertising();
@@ -36,10 +38,12 @@ void BleManager::begin() {
 void BleManager::onConnect(BLEServer* pS) { deviceConnected = true; }
 void BleManager::onDisconnect(BLEServer* pS) { deviceConnected = false; BLEDevice::startAdvertising(); }
 
-void BleManager::updateData(float bT, float aT, float h, float i, float p, float e, float v, uint32_t s, String a) {
+void BleManager::updateData(float bT, float aT, float h, float i, float p, float e, float v, 
+                            uint32_t s, String a, float bpm, float spo2) {
     if (!deviceConnected) return;
     char buf[32];
     auto sD = [&](BLECharacteristic* c, const char* val) { c->setValue(val); c->notify(); delay(35); };
+    
     snprintf(buf, 32, "%.2f C", bT); sD(bodyTempChar, buf);
     snprintf(buf, 32, "%.2f C", aT); sD(airTempChar, buf);
     snprintf(buf, 32, "%.1f %%", h); sD(humidityChar, buf);
@@ -49,6 +53,13 @@ void BleManager::updateData(float bT, float aT, float h, float i, float p, float
     snprintf(buf, 32, "%.2f ppm", v); sD(vocChar, buf);
     snprintf(buf, 32, "%u", s); sD(stepsChar, buf);
     sD(activityChar, a.c_str());
+    
+    snprintf(buf, 32, "%.1f BPM", bpm); sD(bpmChar, buf);
+    snprintf(buf, 32, "%.1f %%", spo2); sD(spo2Char, buf);
+
+    #if SERIAL_DEBUG
+    Serial.println("[BLE] Full Sensor Packet Sent.");
+    #endif
 }
 
 void BleManager::updateSleepData(float hrs, uint8_t d, uint8_t l) {

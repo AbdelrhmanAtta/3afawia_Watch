@@ -1,23 +1,27 @@
 #pragma once
 
-// --- I2C CONFIG ---
-#define I2C_SDA_PIN 2
-#define I2C_SCL_PIN 3
-#define BMI270_ADDRESS 0x68 
-
-// --- TIMING CONFIG ---
-#define READ_PERIOD_MS 3000                 
-#define BME680_STATE_SAVE_PERIOD_MS 3600000 
-
 // --- SYSTEM TOGGLES ---
 #define SERIAL_DEBUG 1
 #define BLE_ENABLED  1  
 
-// --- SENSOR CONFIG ---
+// --- I2C CONFIG ---
+#define I2C_SDA_PIN 2
+#define I2C_SCL_PIN 3
+#define MAX30102_ADDRESS 0x57
+#define BMI270_ADDRESS 0x68 
 #define BME680_ADDRESS 0x76
 #define MAX30205_ADDRESS 0x48
+
+// --- SENSOR CONFIG ---
 #define SKIN_FEVER_LIMIT 38.0
 #define SKIN_HYSTERESIS  37.5
+#define BME680_STATE_SAVE_PERIOD_MS 3600000 
+
+// --- PPG & FFT CONFIG ---
+#define FS 25
+#define BUFFER_SIZE 128    // MUST be power of 2 for FFT
+#define TOTAL_BATCHES 5    // Faster 5-batch average
+#define READ_PERIOD_MS 3000                 
 
 // --- BLE CONFIG (UUIDs) ---
 #define BLE_DEVICE_NAME        "3afawia Watch" 
@@ -33,3 +37,5 @@
 #define MOTION_STATE_UUID      "c4e20002-2b0b-47e2-9b2f-2d79d6184762"
 #define SLEEP_HEAVY_UUID       "c4e20003-2b0b-47e2-9b2f-2d79d6184762"
 #define SLEEP_LIGHT_UUID       "c4e20004-2b0b-47e2-9b2f-2d79d6184762"
+#define BPM_CHAR_UUID          "c4e20005-2b0b-47e2-9b2f-2d79d6184762"
+#define SPO2_CHAR_UUID         "c4e20006-2b0b-47e2-9b2f-2d79d6184762"
