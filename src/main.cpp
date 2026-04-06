@@ -6,12 +6,14 @@
 #include "BMI270_Handler.h"
 #include "BLE_Handler.h"
 #include "MAX30102_Handler.h"
+#include "ICS43434_Handler.h" // Added
 
 AirHandler airSensor;
 TempHandler bodySensor(MAX30205_ADDRESS);
 BMI270_Handler bmiSensor;
 BleManager bleServer;
 PPGHandler ppgSensor;
+ICS43434_Handler micSensor; // Added
 
 void setup() {
     #if SERIAL_DEBUG
@@ -30,12 +32,14 @@ void setup() {
     airSensor.begin();
     bmiSensor.begin();
     ppgSensor.begin();
+    micSensor.begin(); // Added
 }
 
 void loop() {
     bodySensor.update();
     airSensor.update();
     bmiSensor.update();
+    micSensor.update(); // Added parallel update
     
     // PPG Update: ignores reading if motion is detected via BMI270
     ppgSensor.update(bmiSensor.isPpgMovementDetected());
@@ -45,11 +49,18 @@ void loop() {
         unsigned long now = millis();
         static unsigned long lastEnvUpdate = 0;
         static unsigned long lastBmiUpdate = 0;
+        static unsigned long lastMicUpdate = 0; // Added
 
-        // HEART RATE: Parallel check, handler handles the 30s minimum wait
+        // HEART RATE
         if (ppgSensor.hasNewData()) {
             bleServer.sendHeartData(ppgSensor.getBPM(), ppgSensor.getSpO2());
             ppgSensor.clearNewData();
+        }
+
+        // MIC DATA: Every 5 Seconds
+        if (now - lastMicUpdate > 5000) {
+            bleServer.sendSoundData(micSensor.getAmbientDB());
+            lastMicUpdate = now;
         }
 
         // ENVIRONMENT: Every 5 Seconds

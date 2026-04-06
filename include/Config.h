@@ -12,6 +12,13 @@
 #define BME680_ADDRESS 0x76
 #define MAX30205_ADDRESS 0x48
 
+// --- ICS43434 MIC CONFIG ---
+#define MIC_SCK_PIN  4         // I2S Clock (BCK)
+#define MIC_WS_PIN   5         // Word Select (L/R Clock)
+#define MIC_SD_PIN   6         // Serial Data Out from Mic
+#define MIC_BLOCK_SIZE 128     // Number of samples per DMA read
+#define DB_OFFSET    150.0     // Calibration offset for dB calculation
+
 // --- SENSOR CONFIG ---
 #define SKIN_FEVER_LIMIT 38.0
 #define SKIN_HYSTERESIS  37.5
@@ -39,3 +46,4 @@
 #define SLEEP_LIGHT_UUID       "c4e20004-2b0b-47e2-9b2f-2d79d6184762"
 #define BPM_CHAR_UUID          "c4e20005-2b0b-47e2-9b2f-2d79d6184762"
 #define SPO2_CHAR_UUID         "c4e20006-2b0b-47e2-9b2f-2d79d6184762"
+#define SOUND_CHAR_UUID "c4e20005-2b0b-47e2-9b2f-2d79d6184762"

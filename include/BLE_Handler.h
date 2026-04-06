@@ -16,7 +16,8 @@ public:
     void sendBme680(float airTemp, float humidity, float iaq, float pressure, float eco2, float voc);
     void sendBmi270(uint32_t steps, String activity);
     void sendSleepData(float hrs, uint8_t deep, uint8_t light);
-    void sendHeartData(float bpm, float spo2); // Logic added
+    void sendHeartData(float bpm, float spo2);
+    void sendSoundData(float db); // Added this line
 
     // Keep original for compatibility if needed
     void updateData(float bT, float aT, float h, float i, float p, float e, float v, uint32_t s, String a);
@@ -29,6 +30,7 @@ private:
     BLEServer *pServer;
     BLECharacteristic *bodyTempChar, *airTempChar, *humidityChar, *iaqChar, *pressureChar, *eco2Char, *vocChar;
     BLECharacteristic *stepsChar, *activityChar, *sleepHeavyChar, *sleepLightChar;
-    BLECharacteristic *bpmChar, *spo2Char; // Added PPG
+    BLECharacteristic *bpmChar, *spo2Char;
+    BLECharacteristic *soundChar; // Added this line
     bool deviceConnected;
 };
