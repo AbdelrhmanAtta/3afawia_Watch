@@ -1,0 +1,70 @@
+{
+  "expo": {
+    "name": "VitalBand",
+    "slug": "VitalBand",
+    "scheme": "healthmonitor",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/Tar.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/Tar.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0A0F19"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.wael.vitalband",
+      "infoPlist": {
+        "NSBluetoothAlwaysUsageDescription": "Allow HealthMonitor to connect to your wearable device.",
+        "NSBluetoothPeripheralUsageDescription": "Allow HealthMonitor to connect to your wearable device.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/Tar.png",
+        "backgroundColor": "#121212"
+      },
+      "package": "com.wael.vitalband",
+      "permissions": [
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.BLUETOOTH_SCAN",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "kotlinVersion": "1.9.25"
+          }
+        }
+      ],
+      [
+        "@config-plugins/react-native-ble-plx",
+        {
+          "isBackgroundEnabled": true,
+          "modes": [
+            "peripheral",
+            "central"
+          ],
+          "bluetoothAlwaysPermission": "Allow HealthMonitor to connect to your wearable device."
+        }
+      ],
+      "expo-router",
+      "expo-splash-screen"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "622e3d32-3a50-43ed-8ad1-2c293c8b5551"
+      },
+      "router": {
+        "origin": false
+      }
+    }
+  }
+}
