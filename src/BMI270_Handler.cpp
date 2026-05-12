@@ -60,8 +60,8 @@ void BMI270_Handler::handleMotion() {
             if ((currentTotalSteps - wakeStepAnchor) >= 10 && (now - wakeStartTime <= 60000)) {
                 userIsAsleep = false;
                 isAttemptingWake = false;
-                activityChangeTime = now;
-                lastStepAnchor = currentTotalSteps; // Reset anchor on wake
+                activityChangeTime = now; // Reset sleep timer on wake
+                lastStepAnchor = currentTotalSteps; 
                 #if SERIAL_DEBUG
                 Serial.println("[BMI270] Wake-up detected!");
                 #endif
@@ -80,10 +80,11 @@ void BMI270_Handler::handleMotion() {
     else {
         stepCount = currentTotalSteps;
 
-        // Sleep Detection based on Step Count change
+        // --- 1. SLEEP TIMER LOGIC ---
+        // If steps increase, reset the sleep timer (activityChangeTime)
         if (currentTotalSteps > lastStepAnchor) {
             lastStepAnchor = currentTotalSteps;
-            activityChangeTime = now; // Reset timer because steps were recorded
+            activityChangeTime = now; 
         }
 
         if (now - activityChangeTime > 1200000) { // 20 minutes of no steps
@@ -94,11 +95,18 @@ void BMI270_Handler::handleMotion() {
             #if SERIAL_DEBUG
             Serial.println("[BMI270] Entering Sleep Mode (20 min no steps)...");
             #endif
+            return; // Skip activity update if we just fell asleep
         }
 
+        // --- 2. ACTIVITY DEBOUNCE LOGIC ---
+        // Dedicated timer just for checking walking/running transitions
+        static uint32_t activityDebounceTimer = 0;
+        
         if (rawActivity != currentActivity) {
             if (rawActivity == pendingActivity) {
-                if (now - activityChangeTime > 5000) {
+                // I lowered this from 5000 to 2500ms. The BMI270 is accurate enough 
+                // that 2.5 seconds of consistent walking is a reliable state change.
+                if (now - activityDebounceTimer > 2500) { 
                     currentActivity = rawActivity;
                     switch(currentActivity) {
                         case BMI2_STEP_ACTIVITY_WALKING: actStr = "Walking"; break;
@@ -107,9 +115,12 @@ void BMI270_Handler::handleMotion() {
                     }
                 }
             } else {
+                // New activity detected! Start the debounce timer.
                 pendingActivity = rawActivity;
+                activityDebounceTimer = now; 
             }
         } else {
+            // State is stable
             pendingActivity = currentActivity;
         }
     }

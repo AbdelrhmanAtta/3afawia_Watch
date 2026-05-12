@@ -1,8 +1,8 @@
 #include "ICS43434_Handler.h"
 #include <math.h>
 
-// Initializing with 35.0f to prevent a 0.0 starting jump
-ICS43434_Handler::ICS43434_Handler() : smoothed_db(35.0f), peak_db(0.0f) {}
+// Initialize variables
+ICS43434_Handler::ICS43434_Handler() : smoothed_db(35.0f), peak_db(35.0f), sample_index(0) {}
 
 bool ICS43434_Handler::begin() {
     i2s_config_t i2s_config = {
@@ -12,8 +12,8 @@ bool ICS43434_Handler::begin() {
         .channel_format = I2S_CHANNEL_FMT_ONLY_LEFT,
         .communication_format = I2S_COMM_FORMAT_STAND_I2S,
         .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
-        .dma_buf_count = 4,            // Optimized for ESP32-C3 RAM
-        .dma_buf_len = MIC_BLOCK_SIZE,
+        .dma_buf_count = 4,
+        .dma_buf_len = CHUNK_SIZE, 
         .use_apll = false
     };
 
@@ -46,44 +46,96 @@ bool ICS43434_Handler::begin() {
 
 void ICS43434_Handler::update() {
     size_t bytes_read = 0;
-    // Non-blocking read (0ms timeout) for parallel loop performance
+    int32_t raw_samples[64]; // Read whatever is immediately available
+    
+    // Non-blocking read (0ms timeout)
     esp_err_t result = i2s_read(I2S_NUM_0, &raw_samples, sizeof(raw_samples), &bytes_read, 0);
 
     if (result == ESP_OK && bytes_read > 0) {
         int samples_count = bytes_read / 4;
-        float sum_sq = 0;
         
+        // 1. Accumulate samples into our chunk buffer
         for (int i = 0; i < samples_count; i++) {
-            // Shift 8 bits to align 24-bit data in 32-bit slot and normalize
-            float sample = (float)(raw_samples[i] >> 8) * (1.0f / 8388608.0f);
-            sum_sq += (sample * sample);
+            if (sample_index < CHUNK_SIZE) {
+                // Safely convert 32-bit I2S data to a float between -1.0 and 1.0
+                sample_buffer[sample_index++] = (float)raw_samples[i] / 2147483648.0f;
+            }
         }
-        
-        float mean_sq = sum_sq / (float)samples_count;
 
-        // Efficient dB calculation: skips sqrtf() by using 10.0 * log10
-        float inst_db = 10.0f * log10f(mean_sq + 1e-12f) + DB_OFFSET;
-        
-        // --- HARD CONSTRAIN 0-120 dB ---
-        inst_db = constrain(inst_db, 0.0f, 120.0f);
-        
-        if (inst_db > peak_db) peak_db = inst_db;
-        
-        // Apply 98% smoothing for stable ambient reporting
-        smoothed_db = (smoothed_db * 0.98f) + (inst_db * 0.02f);
+        // 2. Process only when we have a full cohesive chunk of audio
+        if (sample_index >= CHUNK_SIZE) {
+            
+            // Step A: Find the DC Offset (Average of the chunk)
+            float sum = 0.0f;
+            for (int i = 0; i < CHUNK_SIZE; i++) {
+                sum += sample_buffer[i];
+            }
+            float dc_offset = sum / (float)CHUNK_SIZE;
 
-        #if SERIAL_DEBUG
-        static uint32_t lastPrint = 0;
-        if (millis() - lastPrint > 2000) {
-            Serial.printf("[MIC] Ambient: %.1f dB | Peak: %.1f dB\n", smoothed_db, peak_db);
-            lastPrint = millis();
+            // Step B: Calculate RMS with DC Offset removed
+            float sum_sq = 0.0f;
+            for (int i = 0; i < CHUNK_SIZE; i++) {
+                float corrected_sample = sample_buffer[i] - dc_offset;
+                sum_sq += (corrected_sample * corrected_sample);
+            }
+            float mean_sq = sum_sq / (float)CHUNK_SIZE;
+
+            // Step C: Get the Raw Decibels (This includes the invisible ESP32 electrical noise)
+            float dbfs = 10.0f * log10f(mean_sq + 1e-12f);
+            float raw_db = dbfs + 120.0f; 
+            
+            // ==========================================
+            // Step D: THE SMART CALIBRATOR
+            // ==========================================
+            
+            // 1. The invisible noise floor. If your room is totally quiet but the 
+            // serial monitor is jumping without you talking, increase this to 68.0 or 70.0.
+            float board_noise_floor = 65.0f; 
+            
+            // 2. What you actually want the screen to show when the room is quiet.
+            float quiet_room_target = 35.0f; 
+            
+            // 3. THE SCREAM MULTIPLIER! 
+            // At 5.0, a slight raise in your voice will shoot past 60. A scream will hit 90+.
+            float sensitivity_boost = 5.0f;  
+            
+            float inst_db;
+            if (raw_db > board_noise_floor) {
+                // You are making noise! Multiply the difference so it shoots up.
+                inst_db = quiet_room_target + ((raw_db - board_noise_floor) * sensitivity_boost);
+            } else {
+                // The room is quiet. Lock it to your target.
+                inst_db = quiet_room_target;
+            }
+            
+            // Hard constrain 0-120 dB so it never outputs a crazy impossible number
+            inst_db = constrain(inst_db, 0.0f, 120.0f);
+            
+            // Update Peak Tracking
+            if (inst_db > peak_db) {
+                peak_db = inst_db;
+            }
+            
+            // Apply smoothing for ambient reporting (so the numbers don't flicker too fast)
+            smoothed_db = (smoothed_db * 0.85f) + (inst_db * 0.15f);
+
+            // Reset index to start filling the next chunk
+            sample_index = 0; 
+
+            #if SERIAL_DEBUG
+            static uint32_t lastPrint = 0;
+            if (millis() - lastPrint > 1000) {
+                Serial.printf("[MIC] Ambient: %.1f dB | Peak: %.1f dB\n", smoothed_db, peak_db);
+                lastPrint = millis();
+            }
+            #endif
         }
-        #endif
     }
 }
 
 float ICS43434_Handler::getPeakAndReset() {
     float p = peak_db;
-    peak_db = 0;
+    // Reset peak to current ambient, NOT 0, to avoid artificial jumping in the next cycle
+    peak_db = smoothed_db; 
     return p;
 }

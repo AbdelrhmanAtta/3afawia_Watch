@@ -5,17 +5,18 @@
 #define BLE_ENABLED  1  
 
 // --- I2C CONFIG ---
-#define I2C_SDA_PIN 2
-#define I2C_SCL_PIN 3
+#define I2C_SDA_PIN 6
+#define I2C_SCL_PIN 7
 #define MAX30102_ADDRESS 0x57
 #define BMI270_ADDRESS 0x68 
 #define BME680_ADDRESS 0x76
 #define MAX30205_ADDRESS 0x48
 
 // --- ICS43434 MIC CONFIG ---
-#define MIC_SCK_PIN  4         // I2S Clock (BCK)
-#define MIC_WS_PIN   5         // Word Select (L/R Clock)
-#define MIC_SD_PIN   6         // Serial Data Out from Mic
+#define MIC_CALIBRATION 10.0f
+#define MIC_SCK_PIN  10        // I2S Clock (BCK)
+#define MIC_WS_PIN   9         // Word Select (L/R Clock)
+#define MIC_SD_PIN   8         // Serial Data Out from Mic
 #define MIC_BLOCK_SIZE 128     // Number of samples per DMA read
 #define DB_OFFSET    150.0     // Calibration offset for dB calculation
 
@@ -46,4 +47,4 @@
 #define SLEEP_LIGHT_UUID       "c4e20004-2b0b-47e2-9b2f-2d79d6184762"
 #define BPM_CHAR_UUID          "c4e20005-2b0b-47e2-9b2f-2d79d6184762"
 #define SPO2_CHAR_UUID         "c4e20006-2b0b-47e2-9b2f-2d79d6184762"
-#define SOUND_CHAR_UUID "c4e20005-2b0b-47e2-9b2f-2d79d6184762"
+#define SOUND_CHAR_UUID        "c4e20007-2b0b-47e2-9b2f-2d79d6184762"
